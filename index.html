@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Download Nama ke Word</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.2/docx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.2.2/build/index.umd.js"></script>
 </head>
 <body>
   <h2>Masukkan Nama</h2>
@@ -12,7 +12,7 @@
 
   <script>
     async function downloadWord() {
-      const { Document, Packer, Paragraph, TextRun } = docx;
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
 
       const nama = document.getElementById("namaInput").value;
       if (!nama) {
@@ -20,26 +20,14 @@
         return;
       }
 
-      // Membuat dokumen Word
       const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun(`Nama: ${nama}`)
-                ],
-              }),
-            ],
-          },
-        ],
+        sections: [{
+          children: [new Paragraph({ children: [new TextRun(`Nama: ${nama}`)] })]
+        }],
       });
 
-      // Generate file Word
       const blob = await Packer.toBlob(doc);
 
-      // Download otomatis
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "Nama.docx";
