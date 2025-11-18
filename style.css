@@ -1,0 +1,6 @@
+body { font-family: Arial, sans-serif; padding: 20px; }
+h1, h2 { color: #333; }
+input { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+button { padding: 5px 10px; margin: 5px 5px 5px 0; cursor: pointer; }
