@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Download Nama ke Word</title>
-  <!-- Library UMD untuk browser -->
-  <script src="https://cdn.jsdelivr.net/npm/docx@7.2.2/build/index.umd.js"></script>
 </head>
 <body>
   <h2>Masukkan Nama</h2>
@@ -12,40 +10,32 @@
   <button onclick="downloadWord()">OK</button>
 
   <script>
-    async function downloadWord() {
-      // Akses library dari window.docx
-      const { Document, Packer, Paragraph, TextRun } = window.docx;
-
+    function downloadWord() {
       const nama = document.getElementById("namaInput").value;
       if (!nama) {
         alert("Tolong masukkan nama!");
         return;
       }
 
-      // Buat dokumen Word
-      const doc = new Document({
-        sections: [{
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Nama: ${nama}`,
-                  bold: true,
-                  size: 28
-                })
-              ]
-            })
-          ]
-        }]
-      });
+      // Buat isi Word sederhana dengan format HTML
+      const htmlContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office'
+              xmlns:w='urn:schemas-microsoft-com:office:word'
+              xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><title>Nama</title></head>
+        <body>
+          <h1>Nama: ${nama}</h1>
+        </body>
+        </html>
+      `;
 
-      // Generate file Word
-      const blob = await Packer.toBlob(doc);
+      // Buat blob dengan MIME type Word
+      const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
 
       // Download otomatis
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = "Nama.docx";
+      link.download = 'Nama.doc';
       link.click();
     }
   </script>
