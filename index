@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Download Nama ke Word</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.2/docx.min.js"></script>
+</head>
+<body>
+  <h2>Masukkan Nama</h2>
+  <input type="text" id="namaInput" placeholder="Tulis nama di sini" />
+  <button onclick="downloadWord()">OK</button>
+
+  <script>
+    async function downloadWord() {
+      const { Document, Packer, Paragraph, TextRun } = docx;
+
+      const nama = document.getElementById("namaInput").value;
+      if (!nama) {
+        alert("Tolong masukkan nama!");
+        return;
+      }
+
+      // Membuat dokumen Word
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun(`Nama: ${nama}`)
+                ],
+              }),
+            ],
+          },
+        ],
+      });
+
+      // Generate file Word
+      const blob = await Packer.toBlob(doc);
+
+      // Download otomatis
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Nama.docx";
+      link.click();
+    }
+  </script>
+</body>
+</html>
