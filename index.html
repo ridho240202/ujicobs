@@ -2,42 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Download Nama ke Word</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Order System</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <h2>Masukkan Nama</h2>
-  <input type="text" id="namaInput" placeholder="Tulis nama di sini" />
-  <button onclick="downloadWord()">OK</button>
+  <h1>📄 Purchase Order (PO) System</h1>
 
-  <script>
-    function downloadWord() {
-      const nama = document.getElementById("namaInput").value;
-      if (!nama) {
-        alert("Tolong masukkan nama!");
-        return;
-      }
+  <section id="company-info">
+    <h2>Informasi Perusahaan / Customer</h2>
+    <label>Perusahaan: <input type="text" id="perusahaan"></label>
+    <label>Alamat: <input type="text" id="alamat"></label>
+    <label>Fax: <input type="text" id="fax"></label>
+    <label>Melalui: <input type="text" id="melalui"></label>
+    <label>Kontak Person: <input type="text" id="kontak"></label>
+  </section>
 
-      // Buat isi Word sederhana dengan format HTML
-      const htmlContent = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office'
-              xmlns:w='urn:schemas-microsoft-com:office:word'
-              xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><title>Nama</title></head>
-        <body>
-          <h1>Nama: ${nama}</h1>
-        </body>
-        </html>
-      `;
+  <section id="po-items">
+    <h2>Item PO (Alat yang Dikalibrasi)</h2>
+    <button id="add-item-btn">Tambah Item</button>
+    <button id="download-btn">Download Excel</button>
+    <table id="items-table">
+      <thead>
+        <tr>
+          <th>Nama Alat</th>
+          <th>No Seri</th>
+          <th>Qty</th>
+          <th>Total Jam</th>
+          <th>Harga</th>
+          <th>Total</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
-      // Buat blob dengan MIME type Word
-      const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
-
-      // Download otomatis
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'Nama.doc';
-      link.click();
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
