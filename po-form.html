@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Form PO</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="lib/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h2>Buat / Edit Purchase Order</h2>
+
+  <h3>Informasi Perusahaan / Customer</h3>
+  <label>Perusahaan: <input type="text" id="perusahaan"></label><br>
+  <label>Alamat: <input type="text" id="alamat"></label><br>
+  <label>Fax: <input type="text" id="fax"></label><br>
+  <label>Melalui: <input type="text" id="melalui"></label><br>
+  <label>Kontak Person: <input type="text" id="kontak"></label><br>
+
+  <h3>Item PO (Alat yang Dikalibrasi)</h3>
+  <table id="poItemTable">
+    <thead>
+      <tr>
+        <th>Nama Alat</th>
+        <th>No Seri</th>
+        <th>Qty</th>
+        <th>Total Jam</th>
+        <th>Harga</th>
+        <th>Total</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <select id="itemSelect"></select>
+  <button onclick="addPOItem()">Tambah Item</button>
+  <br><br>
+  <button onclick="savePO()">Simpan PO</button>
+  <button onclick="downloadExcel()">Download Excel</button>
+
+  <script>
+    let poItems = JSON.parse(localStorage.getItem('currentPOItems') || '[]');
+    let itemData = JSON.parse(localStorage.getItem('itemData') || '[]');
+
+    const currentPO = JSON.parse(localStorage.getItem('currentPO') || '{}');
+    document.getElementById('perusahaan').value = currentPO.perusahaan || '';
+    document.getElementById('alamat').value = currentPO.alamat || '';
+    document.getElementById('fax').value = currentPO.fax || '';
+    document.getElementById('melalui').value = currentPO.melalui || '';
+    document.getElementById('kontak').value = currentPO.kontak || '';
+
+    function renderPOItems() {
+      const tbody = document.querySelector('#poItemTable tbody');
+      tbody.innerHTML = '';
+      poItems.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.nama}</td>
+          <td>${item.noSeri||''}</td>
+          <td>${item.qty||1}</td>
+          <td>${item.totalJam||''}</td>
+          <td>${item.harga||''}</td>
+          <td>${item.total||''}</td>
+          <td><button onclick="deletePOItem(${idx})">Hapus</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateItemSelect() {
+      const sel = document.getElementById('itemSelect');
+      sel.innerHTML = '';
+      itemData.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        sel.appendChild(opt);
+      });
+    }
+
+    function addPOItem() {
+      const nama = document.getElementById('itemSelect').value;
+      poItems.push({nama, qty:1});
+      localStorage.setItem('currentPOItems', JSON.stringify(poItems));
+      renderPOItems();
+    }
+
+    function deletePOItem(idx) {
+      poItems.splice(idx,1);
+      localStorage.setItem('currentPOItems', JSON.stringify(poItems));
+      renderPOItems();
+    }
+
+    function savePO() {
+      const po = {
+        perusahaan: document.getElementById('perusahaan').value,
+        alamat: document.getElementById('alamat').value,
+        fax: document.getElementById('fax').value,
+        melalui: document.getElementById('melalui').value,
+        kontak: document.getElementById('kontak').value,
+        items: poItems
+      };
+      let poData = JSON.parse(localStorage.getItem('poData') || '[]');
+      const editIndex = localStorage.getItem('editIndex');
+      if(editIndex !== null) {
+        poData[editIndex] = po;
+        localStorage.removeItem('editIndex');
+      } else {
+        poData.push(po);
+      }
+      localStorage.setItem('poData', JSON.stringify(poData));
+      alert('PO berhasil disimpan!');
+      window.location.href = 'index.html';
+    }
+
+    function downloadExcel() {
+      const ws_data = [
+        ['Nama Alat','No Seri','Qty','Total Jam','Harga','Total'],
+        ...poItems.map(i => [i.nama,i.noSeri||'',i.qty,i.totalJam||'',i.harga||'',i.total||''])
+      ];
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, 'PO');
+      XLSX.writeFile(wb, 'PO.xlsx');
+    }
+
+    populateItemSelect();
+    renderPOItems();
+  </script>
+</body>
+</html>
