@@ -2,35 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purchase Order System</title>
+  <title>PO System</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <h1>📄 Purchase Order (PO) System</h1>
+  <nav>
+    <button onclick="showPage('poList')">Tampilan PO</button>
+    <button onclick="showPage('itemList')">Daftar Item & Harga</button>
+  </nav>
 
-  <section id="company-info">
-    <h2>Informasi Perusahaan / Customer</h2>
-    <label>Perusahaan: <input type="text" id="perusahaan"></label>
-    <label>Alamat: <input type="text" id="alamat"></label>
-    <label>Fax: <input type="text" id="fax"></label>
-    <label>Melalui: <input type="text" id="melalui"></label>
-    <label>Kontak Person: <input type="text" id="kontak"></label>
-  </section>
+  <!-- Halaman PO List -->
+  <div id="poList" class="page">
+    <h2>Daftar Purchase Order</h2>
+    <table id="poTable">
+      <thead>
+        <tr>
+          <th>Perusahaan</th>
+          <th>Alamat</th>
+          <th>Fax</th>
+          <th>Melalui</th>
+          <th>Kontak Person</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="createNewPO()">+ Buat PO Baru</button>
+  </div>
 
-  <section id="po-items">
-    <h2>Item PO (Alat yang Dikalibrasi)</h2>
-    <button id="add-item-btn">Tambah Item</button>
-    <button id="download-btn">Download Excel</button>
-    <table id="items-table">
+  <!-- Halaman Item List -->
+  <div id="itemList" class="page" style="display:none;">
+    <h2>Daftar Nama Alat</h2>
+    <table id="itemTable">
       <thead>
         <tr>
           <th>Nama Alat</th>
-          <th>No Seri</th>
-          <th>Qty</th>
-          <th>Total Jam</th>
-          <th>Harga</th>
-          <th>Total</th>
           <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <input type="text" id="newItem" placeholder="Nama Alat">
+    <button onclick="addItem()">Simpan</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
