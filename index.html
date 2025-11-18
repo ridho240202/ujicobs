@@ -2,27 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Download Nama ke PDF</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Download Nama ke Word</title>
+  <!-- Versi UMD yang cocok untuk browser -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.2.2/build/index.umd.js"></script>
 </head>
 <body>
   <h2>Masukkan Nama</h2>
   <input type="text" id="namaInput" placeholder="Tulis nama di sini" />
-  <button onclick="downloadPDF()">OK</button>
+  <button onclick="downloadWord()">OK</button>
 
   <script>
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf; // pastikan akses window.jspdf
-      const nama = document.getElementById("namaInput").value;
+    async function downloadWord() {
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
 
+      const nama = document.getElementById("namaInput").value;
       if (!nama) {
         alert("Tolong masukkan nama!");
         return;
       }
 
-      const doc = new jsPDF();
-      doc.text(`Nama: ${nama}`, 20, 20);
-      doc.save("Nama.pdf"); // download langsung
+      // Buat dokumen Word baru
+      const doc = new Document({
+        sections: [{
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Nama: ${nama}`,
+                  bold: true,
+                  size: 28 // ukuran font
+                })
+              ]
+            })
+          ]
+        }]
+      });
+
+      // Generate file Word (blob)
+      const blob = await Packer.toBlob(doc);
+
+      // Download otomatis
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Nama.docx";
+      link.click();
     }
   </script>
 </body>
