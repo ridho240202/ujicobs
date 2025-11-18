@@ -11,8 +11,8 @@
   <button onclick="downloadPDF()">OK</button>
 
   <script>
-    async function downloadPDF() {
-      const { jsPDF } = window.jspdf;
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf; // pastikan akses window.jspdf
       const nama = document.getElementById("namaInput").value;
 
       if (!nama) {
@@ -20,14 +20,9 @@
         return;
       }
 
-      // Buat dokumen PDF baru
       const doc = new jsPDF();
-
-      // Tambahkan teks
       doc.text(`Nama: ${nama}`, 20, 20);
-
-      // Download otomatis
-      doc.save("Nama.pdf");
+      doc.save("Nama.pdf"); // download langsung
     }
   </script>
 </body>
