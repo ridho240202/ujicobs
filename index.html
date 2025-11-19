@@ -1,147 +1,202 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PO System — Single Page + Export Excel</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>PO System</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body{font-family:Arial;background:#f7f7f7;padding:20px}
-    .box{background:#fff;padding:20px;border-radius:10px;max-width:900px;margin:auto;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    label{display:block;margin-top:10px;font-size:14px}
-    input,select{padding:8px;width:100%;margin-top:4px;border:1px solid #ccc;border-radius:6px}
-    table{width:100%;border-collapse:collapse;margin-top:15px}
-    th,td{border:1px solid #ddd;padding:8px;font-size:14px}
-    .btn{padding:8px 12px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;margin-top:10px}
-    .btn.red{background:#dc2626}
+    body { font-family: Arial; margin: 20px; }
+    input, select { padding: 6px; width: 100%; margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    button { padding: 8px 14px; margin-top: 10px; }
+    .section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
   </style>
 </head>
 <body>
-<div class="box">
-  <h2>📄 Form Purchase Order</h2>
 
-  <h3>1) Informasi Perusahaan</h3>
-  <label>Perusahaan <input id="company_name"></label>
-  <label>Alamat <input id="company_address"></label>
-  <label>Fax <input id="company_fax"></label>
-  <label>Melalui <input id="company_via"></label>
-  <label>Kontak Person <input id="company_contact"></label>
+<h2>📄 PURCHASE ORDER SYSTEM</h2>
 
-  <h3>2) Item PO</h3>
-  <label>Pilih Nama Alat
-    <select id="tool_select"></select>
-  </label>
-  <label>Qty <input id="qty" type="number" min="1" value="1"></label>
-  <label>Tarif (editable) <input id="price" type="number" min="0" value="0"></label>
-  <button class="btn" id="add_item">Tambah Item</button>
+<!-- =========================== INFORMASI PERUSAHAAN =========================== -->
+<div class="section">
+  <h3>1. Informasi Perusahaan</h3>
 
-  <table id="items_table">
-    <thead>
-      <tr>
-        <th>Nama Alat</th><th>Lokasi</th><th>Akreditasi</th><th>Kemampuan</th><th>Qty</th><th>Tarif</th><th>Total</th><th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <label>Perusahaan</label>
+  <input id="perusahaan" type="text" />
 
-  <h3>Total: <span id="po_total">0</span></h3>
+  <label>Alamat</label>
+  <input id="alamat" type="text" />
 
-  <button class="btn" id="export_excel">📥 Download Excel</button>
+  <label>Fax</label>
+  <input id="fax" type="text" />
+
+  <label>Melalui</label>
+  <input id="melalui" type="text" />
+
+  <label>Kontak Person</label>
+  <input id="kontak" type="text" />
 </div>
 
+<!-- =========================== DATA ALAT DARI JSON =========================== -->
 <script>
-// SAMPLE DATA — ganti dengan data Anda atau file data.json
-const SAMPLE_DATA = [
-  {"id":"A1","nama":"Alat Kalibrasi A","tarif":150000,"lokasi":"Lab A","status_akreditasi":"SNI","kemampuan":"0.01 - 100"},
-  {"id":"A2","nama":"Alat Uji B","tarif":200000,"lokasi":"Lab B","status_akreditasi":"ISO","kemampuan":"0.1 - 50"}
+const alatData = [
+  {
+    "nama": "Multimeter Digital",
+    "lokasi": "Lab Kalibrasi A",
+    "akreditasi": "ISO 17025",
+    "kemampuan": "0 - 1000V",
+    "tarif": 150000
+  },
+  {
+    "nama": "Sound Level Meter",
+    "lokasi": "Lab Akustik",
+    "akreditasi": "KAN",
+    "kemampuan": "30 - 130 dB",
+    "tarif": 200000
+  }
 ];
-
-let tools = SAMPLE_DATA;
-let items = [];
-
-function loadTools(){
-  const sel = document.getElementById('tool_select');
-  sel.innerHTML = '';
-  tools.forEach(t=>{
-    const o = document.createElement('option');
-    o.value = t.id;
-    o.textContent = `${t.nama} — Rp ${t.tarif.toLocaleString('id-ID')}`;
-    o.dataset.tarif = t.tarif;
-    sel.appendChild(o);
-  });
-  document.getElementById('price').value = tools[0].tarif;
-}
-
-loadTools();
-
-document.getElementById('tool_select').addEventListener('change', e=>{
-  const opt = e.target.options[e.target.selectedIndex];
-  document.getElementById('price').value = opt.dataset.tarif;
-});
-
-document.getElementById('add_item').addEventListener('click', ()=>{
-  const id = document.getElementById('tool_select').value;
-  const tool = tools.find(t=>t.id==id);
-  const qty = parseFloat(document.getElementById('qty').value) || 1;
-  const price = parseFloat(document.getElementById('price').value) || tool.tarif;
-
-  items.push({nama:tool.nama,lokasi:tool.lokasi,akreditasi:tool.status_akreditasi,kemampuan:tool.kemampuan,qty,price});
-  renderItems();
-});
-
-function renderItems(){
-  const tbody = document.querySelector('#items_table tbody');
-  tbody.innerHTML = '';
-  let total = 0;
-
-  items.forEach((it,idx)=>{
-    const row = document.createElement('tr');
-    const subtotal = it.qty * it.price;
-    total += subtotal;
-
-    row.innerHTML = `
-      <td>${it.nama}</td>
-      <td>${it.lokasi}</td>
-      <td>${it.akreditasi}</td>
-      <td>${it.kemampuan}</td>
-      <td>${it.qty}</td>
-      <td>${it.price}</td>
-      <td>${subtotal}</td>
-      <td><button class='btn red' onclick='removeItem(${idx})'>Hapus</button></td>
-    `;
-
-    tbody.appendChild(row);
-  });
-
-  document.getElementById('po_total').textContent = total.toLocaleString('id-ID');
-}
-
-function removeItem(i){ items.splice(i,1); renderItems(); }
-
-// EXPORT KE EXCEL
-document.getElementById('export_excel').addEventListener('click', ()=>{
-  const data = [];
-
-  data.push({"FIELD":"Perusahaan", "VALUE":document.getElementById('company_name').value});
-  data.push({"FIELD":"Alamat", "VALUE":document.getElementById('company_address').value});
-  data.push({"FIELD":"Fax", "VALUE":document.getElementById('company_fax').value});
-  data.push({"FIELD":"Melalui", "VALUE":document.getElementById('company_via').value});
-  data.push({"FIELD":"Kontak Person", "VALUE":document.getElementById('company_contact').value});
-  data.push({});
-  data.push({"FIELD":"Items PO", "VALUE":""});
-
-  items.forEach(it=>{
-    data.push({
-      "FIELD":`${it.nama} (Qty ${it.qty})`,
-      "VALUE":`Tarif ${it.price} — Total ${it.qty*it.price}`
-    });
-  });
-
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "PO");
-  XLSX.writeFile(wb, "PO.xlsx");
-});
 </script>
+
+<!-- =========================== FORM PEMBUATAN PO =========================== -->
+<div class="section">
+  <h3>2. Item Purchase Order</h3>
+
+  <label>Pilih Nama Alat</label>
+  <select id="pilihAlat" onchange="isiDetailAlat()">
+    <option value="">-- pilih alat --</option>
+  </select>
+
+  <div id="detailAlat" style="margin-top:10px; display:none;">
+    <label>Lokasi</label>
+    <input id="lokasi" type="text" disabled />
+
+    <label>Akreditasi</label>
+    <input id="akreditasi" type="text" disabled />
+
+    <label>Kemampuan</label>
+    <input id="kemampuan" type="text" disabled />
+
+    <label>Tarif (bisa diedit)</label>
+    <input id="tarif" type="number" />
+
+    <label>Qty</label>
+    <input id="qty" type="number" min="1" value="1" />
+
+    <button onclick="tambahItem()">Tambah Item</button>
+  </div>
+</div>
+
+<!-- =========================== TABEL PO =========================== -->
+<h3>Daftar Item PO</h3>
+<table id="tabelPO">
+  <thead>
+    <tr>
+      <th>Nama Alat</th>
+      <th>Lokasi</th>
+      <th>Akreditasi</th>
+      <th>Kemampuan</th>
+      <th>Qty</th>
+      <th>Tarif</th>
+      <th>Total</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<button onclick="downloadExcel()">📥 Download Excel</button>
+
+<script>
+// ====== Load alat ke dropdown ======
+window.onload = function () {
+  let select = document.getElementById("pilihAlat");
+  alatData.forEach((a, i) => {
+    let opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = a.nama;
+    select.appendChild(opt);
+  });
+};
+
+// ====== Tampilkan detail alat ======
+function isiDetailAlat() {
+  let idx = document.getElementById("pilihAlat").value;
+  if (idx === "") return;
+  let a = alatData[idx];
+
+  document.getElementById("lokasi").value = a.lokasi;
+  document.getElementById("akreditasi").value = a.akreditasi;
+  document.getElementById("kemampuan").value = a.kemampuan;
+  document.getElementById("tarif").value = a.tarif;
+
+  document.getElementById("detailAlat").style.display = "block";
+}
+
+// ====== Tambah item ke tabel ======
+function tambahItem() {
+  let idx = document.getElementById("pilihAlat").value;
+  if (idx === "") return;
+
+  let a = alatData[idx];
+  let qty = parseInt(document.getElementById("qty").value);
+  let tarif = parseInt(document.getElementById("tarif").value);
+  let total = qty * tarif;
+
+  let tbody = document.querySelector("#tabelPO tbody");
+  let row = document.createElement("tr");
+
+  row.innerHTML = `
+    <td>${a.nama}</td>
+    <td>${a.lokasi}</td>
+    <td>${a.akreditasi}</td>
+    <td>${a.kemampuan}</td>
+    <td>${qty}</td>
+    <td>${tarif}</td>
+    <td>${total}</td>
+    <td><button onclick="hapusRow(this)">Hapus</button></td>
+  `;
+
+  tbody.appendChild(row);
+}
+
+// ====== Hapus ======
+function hapusRow(btn) {
+  btn.parentElement.parentElement.remove();
+}
+
+// ====== Download Excel ======
+function downloadExcel() {
+  let perusahaan = document.getElementById("perusahaan").value;
+  let alamat = document.getElementById("alamat").value;
+  let fax = document.getElementById("fax").value;
+  let melalui = document.getElementById("melalui").value;
+  let kontak = document.getElementById("kontak").value;
+
+  let rows = [["Nama Alat", "Lokasi", "Akreditasi", "Kemampuan", "Qty", "Tarif", "Total" ]];
+  document.querySelectorAll("#tabelPO tbody tr").forEach(tr => {
+    let data = Array.from(tr.children).slice(0,7).map(td => td.innerText);
+    rows.push(data);
+  });
+
+  // Sheet 1: Informasi Perusahaan
+  let sheet1 = [
+    ["Perusahaan", perusahaan],
+    ["Alamat", alamat],
+    ["Fax", fax],
+    ["Melalui", melalui],
+    ["Kontak Person", kontak]
+  ];
+
+  let wb = XLSX.utils.book_new();
+  let ws1 = XLSX.utils.aoa_to_sheet(sheet1);
+  let ws2 = XLSX.utils.aoa_to_sheet(rows);
+
+  XLSX.utils.book_append_sheet(wb, ws1, "Perusahaan");
+  XLSX.utils.book_append_sheet(wb, ws2, "Item PO");
+
+  XLSX.writeFile(wb, "PO.xlsx");
+}
+</script>
+
 </body>
 </html>
