@@ -1,94 +1,67 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>PO System</title>
+  <meta charset="UTF-8">
+  <title>PO System Sederhana</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <style>
     body { font-family: Arial; margin: 20px; }
-    input, select { padding: 6px; width: 100%; margin: 4px 0; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    button { padding: 8px 14px; margin-top: 10px; }
-    .section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+    select, input { width: 100%; padding: 4px; }
+    button { padding: 8px 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
 
 <h2>📄 PURCHASE ORDER SYSTEM</h2>
 
-<!-- =========================== INFORMASI PERUSAHAAN =========================== -->
-<div class="section">
-  <h3>1. Informasi Perusahaan</h3>
+<!-- ===================== INFORMASI PERUSAHAAN ===================== -->
+<h3>1. Informasi Perusahaan</h3>
+<label>Perusahaan</label>
+<input id="perusahaan">
 
-  <label>Perusahaan</label>
-  <input id="perusahaan" type="text" />
+<label>Alamat</label>
+<input id="alamat">
 
-  <label>Alamat</label>
-  <input id="alamat" type="text" />
+<label>Fax</label>
+<input id="fax">
 
-  <label>Fax</label>
-  <input id="fax" type="text" />
+<label>Melalui</label>
+<input id="melalui">
 
-  <label>Melalui</label>
-  <input id="melalui" type="text" />
+<label>Kontak Person</label>
+<input id="kontak">
 
-  <label>Kontak Person</label>
-  <input id="kontak" type="text" />
-</div>
+<hr>
 
-<!-- =========================== DATA ALAT DARI JSON =========================== -->
+<!-- ===================== DATA ALAT JSON ===================== -->
 <script>
 const alatData = [
   {
-    "nama": "Multimeter Digital",
-    "lokasi": "Lab Kalibrasi A",
-    "akreditasi": "ISO 17025",
-    "kemampuan": "0 - 1000V",
-    "tarif": 150000
+    nama: "Multimeter Digital",
+    lokasi: "Lab Kalibrasi A",
+    akreditasi: "ISO 17025",
+    kemampuan: "0 - 1000V",
+    tarif: 150000
   },
   {
-    "nama": "Sound Level Meter",
-    "lokasi": "Lab Akustik",
-    "akreditasi": "KAN",
-    "kemampuan": "30 - 130 dB",
-    "tarif": 200000
+    nama: "Sound Level Meter",
+    lokasi: "Lab Akustik",
+    akreditasi: "KAN",
+    kemampuan: "30 - 130 dB",
+    tarif: 200000
   }
 ];
 </script>
 
-<!-- =========================== FORM PEMBUATAN PO =========================== -->
-<div class="section">
-  <h3>2. Item Purchase Order</h3>
+<!-- ===================== TABEL PO ===================== -->
+<h3>2. Item PO</h3>
 
-  <label>Pilih Nama Alat</label>
-  <select id="pilihAlat" onchange="isiDetailAlat()">
-    <option value="">-- pilih alat --</option>
-  </select>
+<button onclick="tambahRow()">+ Tambah Item</button>
 
-  <div id="detailAlat" style="margin-top:10px; display:none;">
-    <label>Lokasi</label>
-    <input id="lokasi" type="text" disabled />
-
-    <label>Akreditasi</label>
-    <input id="akreditasi" type="text" disabled />
-
-    <label>Kemampuan</label>
-    <input id="kemampuan" type="text" disabled />
-
-    <label>Tarif (bisa diedit)</label>
-    <input id="tarif" type="number" />
-
-    <label>Qty</label>
-    <input id="qty" type="number" min="1" value="1" />
-
-    <button onclick="tambahItem()">Tambah Item</button>
-  </div>
-</div>
-
-<!-- =========================== TABEL PO =========================== -->
-<h3>Daftar Item PO</h3>
-<table id="tabelPO">
+<table id="poTable">
   <thead>
     <tr>
       <th>Nama Alat</th>
@@ -107,64 +80,63 @@ const alatData = [
 <button onclick="downloadExcel()">📥 Download Excel</button>
 
 <script>
-// ====== Load alat ke dropdown ======
-window.onload = function () {
-  let select = document.getElementById("pilihAlat");
-  alatData.forEach((a, i) => {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = a.nama;
-    select.appendChild(opt);
-  });
-};
-
-// ====== Tampilkan detail alat ======
-function isiDetailAlat() {
-  let idx = document.getElementById("pilihAlat").value;
-  if (idx === "") return;
-  let a = alatData[idx];
-
-  document.getElementById("lokasi").value = a.lokasi;
-  document.getElementById("akreditasi").value = a.akreditasi;
-  document.getElementById("kemampuan").value = a.kemampuan;
-  document.getElementById("tarif").value = a.tarif;
-
-  document.getElementById("detailAlat").style.display = "block";
-}
-
-// ====== Tambah item ke tabel ======
-function tambahItem() {
-  let idx = document.getElementById("pilihAlat").value;
-  if (idx === "") return;
-
-  let a = alatData[idx];
-  let qty = parseInt(document.getElementById("qty").value);
-  let tarif = parseInt(document.getElementById("tarif").value);
-  let total = qty * tarif;
-
-  let tbody = document.querySelector("#tabelPO tbody");
+// Tambah baris kosong dengan dropdown
+function tambahRow() {
+  let tbody = document.querySelector("#poTable tbody");
   let row = document.createElement("tr");
 
   row.innerHTML = `
-    <td>${a.nama}</td>
-    <td>${a.lokasi}</td>
-    <td>${a.akreditasi}</td>
-    <td>${a.kemampuan}</td>
-    <td>${qty}</td>
-    <td>${tarif}</td>
-    <td>${total}</td>
+    <td>
+      <select onchange="isiData(this)">
+        <option value="">-- pilih alat --</option>
+        ${alatData.map((a,i)=>`<option value="${i}">${a.nama}</option>`).join("")}
+      </select>
+    </td>
+    <td class="lokasi"></td>
+    <td class="akreditasi"></td>
+    <td class="kemampuan"></td>
+    <td><input type="number" value="1" min="1" onchange="updateTotal(this)"></td>
+    <td class="tarif"></td>
+    <td class="total"></td>
     <td><button onclick="hapusRow(this)">Hapus</button></td>
   `;
 
   tbody.appendChild(row);
 }
 
-// ====== Hapus ======
+// Ketika memilih alat → otomatis isi detail
+function isiData(selectEl) {
+  let idx = selectEl.value;
+  let row = selectEl.parentElement.parentElement;
+
+  if (idx === "") return;
+
+  let alat = alatData[idx];
+
+  row.querySelector(".lokasi").innerText = alat.lokasi;
+  row.querySelector(".akreditasi").innerText = alat.akreditasi;
+  row.querySelector(".kemampuan").innerText = alat.kemampuan;
+  row.querySelector(".tarif").innerText = alat.tarif;
+
+  updateTotal(selectEl);
+}
+
+// Update total ketika qty berubah
+function updateTotal(el) {
+  let row = el.parentElement.parentElement;
+  let qty = row.querySelector("input").value;
+  let tarif = row.querySelector(".tarif").innerText;
+
+  let total = qty * tarif;
+  row.querySelector(".total").innerText = total;
+}
+
+// Hapus baris
 function hapusRow(btn) {
   btn.parentElement.parentElement.remove();
 }
 
-// ====== Download Excel ======
+// Download Excel
 function downloadExcel() {
   let perusahaan = document.getElementById("perusahaan").value;
   let alamat = document.getElementById("alamat").value;
@@ -172,27 +144,32 @@ function downloadExcel() {
   let melalui = document.getElementById("melalui").value;
   let kontak = document.getElementById("kontak").value;
 
-  let rows = [["Nama Alat", "Lokasi", "Akreditasi", "Kemampuan", "Qty", "Tarif", "Total" ]];
-  document.querySelectorAll("#tabelPO tbody tr").forEach(tr => {
-    let data = Array.from(tr.children).slice(0,7).map(td => td.innerText);
-    rows.push(data);
+  let rows = [["Nama Alat", "Lokasi", "Akreditasi", "Kemampuan", "Qty", "Tarif", "Total"]];
+
+  document.querySelectorAll("#poTable tbody tr").forEach(tr => {
+    let nama = tr.querySelector("select").selectedOptions[0].text;
+    let lokasi = tr.querySelector(".lokasi").innerText;
+    let ak = tr.querySelector(".akreditasi").innerText;
+    let kemampuan = tr.querySelector(".kemampuan").innerText;
+    let qty = tr.querySelector("input").value;
+    let tarif = tr.querySelector(".tarif").innerText;
+    let total = tr.querySelector(".total").innerText;
+
+    rows.push([nama, lokasi, ak, kemampuan, qty, tarif, total]);
   });
 
-  // Sheet 1: Informasi Perusahaan
+  // Sheet perusahaan
   let sheet1 = [
     ["Perusahaan", perusahaan],
     ["Alamat", alamat],
     ["Fax", fax],
     ["Melalui", melalui],
-    ["Kontak Person", kontak]
+    ["Kontak", kontak]
   ];
 
   let wb = XLSX.utils.book_new();
-  let ws1 = XLSX.utils.aoa_to_sheet(sheet1);
-  let ws2 = XLSX.utils.aoa_to_sheet(rows);
-
-  XLSX.utils.book_append_sheet(wb, ws1, "Perusahaan");
-  XLSX.utils.book_append_sheet(wb, ws2, "Item PO");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheet1), "Perusahaan");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Item PO");
 
   XLSX.writeFile(wb, "PO.xlsx");
 }
