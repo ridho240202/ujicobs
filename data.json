@@ -1,32 +1,20 @@
-{
-  "items": [
-    {
-      "name": "Compression Tester (Compression Head)",
-      "no_seri": "8900",
-      "qty": 60,
-      "total_jam": 10,
-      "harga": 89000
-    },
-    {
-      "name": "Thermometer meter analog, dial atau gelas",
-      "no_seri": "1",
-      "qty": 0,
-      "total_jam": 0,
-      "harga": 0
-    },
-    {
-      "name": "Jasa Kalibrasi In Situ",
-      "no_seri": "16",
-      "qty": 0,
-      "total_jam": 0,
-      "harga": 0
-    },
-    {
-      "name": "Circular Cutter",
-      "no_seri": "900",
-      "qty": 78,
-      "total_jam": 0,
-      "harga": 0
-    }
-  ]
-}
+[
+  {
+    "id": "T-001",
+    "nama": "Alat Kalibrasi A",
+    "tarif": 150000,
+    "waktu": "2 jam",
+    "lokasi": "Site A",
+    "status_akreditasi": "SNI",
+    "kemampuan": "0.01 - 100"
+  },
+  {
+    "id": "T-002",
+    "nama": "Alat Uji B",
+    "tarif": 200000,
+    "waktu": "3 jam",
+    "lokasi": "Site B",
+    "status_akreditasi": "ISO/IEC",
+    "kemampuan": "0.1 - 50"
+  }
+]
