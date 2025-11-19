@@ -13,9 +13,12 @@
 </style>
 </head>
 <body>
+
 <h2>📄 PURCHASE ORDER SYSTEM</h2>
 
-<!-- ==================== 1. INFORMASI PERUSAHAAN ===================== -->
+<!-- ========================================= -->
+<!-- ========== 1. INFORMASI PERUSAHAAN ======= -->
+<!-- ========================================= -->
 <div class="section">
   <h3>1. Informasi Perusahaan</h3>
   <label>Perusahaan</label><input id="perusahaan">
@@ -25,7 +28,9 @@
   <label>Kontak Person</label><input id="kontak">
 </div>
 
-<!-- ==================== DATA JSON UNTUK KALIBRASI ===================== -->
+<!-- ========================================= -->
+<!-- ========== DATA JSON ALAT KALIBRASI ===== -->
+<!-- ========================================= -->
 <script>
 const alatData = [
   {
@@ -43,9 +48,21 @@ const alatData = [
     tarif: 200000
   }
 ];
+
+// Format ke Rupiah
+function toRupiah(num) {
+  return "Rp " + num.toLocaleString("id-ID");
+}
+
+// Convert "Rp 150.000" → 150000 (angka)
+function fromRupiah(str) {
+  return parseInt(str.replace(/[^0-9]/g, "")) || 0;
+}
 </script>
 
-<!-- ==================== 2. ITEM PO (KALIBRASI) ===================== -->
+<!-- ========================================= -->
+<!-- === 2. ITEM PO (ALAT YANG DIKALIBRASI) === -->
+<!-- ========================================= -->
 <div class="section">
   <h3>2. Item PO (Alat yang Dikalibrasi)</h3>
 
@@ -64,7 +81,9 @@ const alatData = [
   </table>
 </div>
 
-<!-- ==================== 3. ALAT NON-KALIBRASI ===================== -->
+<!-- ========================================= -->
+<!-- ====== 3. ALAT TIDAK DAPAT DIKALIBRASI === -->
+<!-- ========================================= -->
 <div class="section">
   <h3>3. Alat Tidak Dapat Dikalibrasi</h3>
   <button onclick="tambahBarisNonKalibrasi()">Tambah Item</button>
@@ -80,7 +99,9 @@ const alatData = [
   </table>
 </div>
 
-<!-- ==================== 4. BIAYA JASA KALIBRATOR ===================== -->
+<!-- ========================================= -->
+<!-- ========= 4. BIAYA JASA KALIBRATOR ======= -->
+<!-- ========================================= -->
 <div class="section">
   <h3>4. Biaya Jasa Kalibrator</h3>
   <button onclick="tambahBarisKalibrator()">Tambah Baris</button>
@@ -96,51 +117,65 @@ const alatData = [
 </div>
 
 <script>
-
-// ========== 2. TAMBAH ITEM KALIBRASI (DENGAN DROPDOWN OTOMATIS) ==========
+/* ================================================================
+   ========== 2. TAMBAH ITEM KALIBRASI + DROPDOWN JSON ============
+   ================================================================ */
 function tambahBarisKalibrasi() {
   let table = document.getElementById("tabelKalibrasi");
   let row = table.insertRow();
 
-  let dropdown = `<select onchange='isiOtomatis(this)'>
+  let dropdown =
+    `<select onchange='isiOtomatis(this)'>
       <option value=''>-- pilih alat --</option>
-      ${alatData.map((a,i)=>`<option value='${i}'>${a.nama}</option>`).join('')}
+      ${alatData.map((a, i) => `<option value='${i}'>${a.nama}</option>`).join("")}
     </select>`;
 
   row.innerHTML = `
     <td>${dropdown}</td>
     <td contenteditable='true'></td>
-    <td contenteditable='true'>1</td>
-    <td contenteditable='true'>0</td>
-    <td contenteditable='true'>0</td>
-    <td contenteditable='false'>0</td>
+    <td class='qty' contenteditable='true'>1</td>
+    <td class='jam' contenteditable='true'>0</td>
+    <td class='harga' contenteditable='true'>${toRupiah(0)}</td>
+    <td class='total' contenteditable='false'>${toRupiah(0)}</td>
     <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
+
+  // Event input agar qty / harga berubah → total update
+  row.addEventListener("input", () => {
+    hitungTotalKalibrasi();
+  });
 }
 
+// isi otomatis dari JSON
 function isiOtomatis(sel) {
   if (sel.value === "") return;
+
   let data = alatData[sel.value];
   let tr = sel.parentElement.parentElement;
 
   tr.cells[1].innerText = "-";
   tr.cells[3].innerText = data.kemampuan;
-  tr.cells[4].innerText = data.tarif;
+  tr.cells[4].innerText = toRupiah(data.tarif);
 
-  hitungTotal();
+  hitungTotalKalibrasi();
 }
 
-// Hitung otomatis total harga
-function hitungTotal() {
-  document.querySelectorAll('#tabelKalibrasi tr').forEach((tr,idx)=>{
-    if (idx===0) return;
-    let qty = parseFloat(tr.cells[2].innerText)||0;
-    let harga = parseFloat(tr.cells[4].innerText)||0;
-    tr.cells[5].innerText = qty * harga;
+// Hitung total otomatis + auto format Rupiah
+function hitungTotalKalibrasi() {
+  document.querySelectorAll("#tabelKalibrasi tr").forEach((tr, idx) => {
+    if (idx === 0) return;
+
+    let qty = parseFloat(tr.querySelector(".qty").innerText) || 0;
+    let harga = fromRupiah(tr.querySelector(".harga").innerText);
+
+    let total = qty * harga;
+    tr.querySelector(".total").innerText = toRupiah(total);
   });
 }
 
-// ========== 3. TAMBAH ITEM NON KALIBRASI (MANUAL) ==========
+/* ================================================================
+   =============== 3. TAMBAH BARIS NON-KALIBRASI ===================
+   ================================================================ */
 function tambahBarisNonKalibrasi() {
   let table = document.getElementById("tabelNonKalibrasi");
   let row = table.insertRow();
@@ -154,30 +189,19 @@ function tambahBarisNonKalibrasi() {
   `;
 }
 
-// ========== 4. BIAYA JASA KALIBRATOR ==========
+/* ================================================================
+   ============= 4. BIAYA JASA KALIBRATOR + RUPIAH ================
+   ================================================================ */
 function tambahBarisKalibrator() {
   let table = document.getElementById("tabelKalibrator");
   let row = table.insertRow();
 
   row.innerHTML = `
     <td contenteditable='true'>1</td>
-    <td contenteditable='true'>0</td>
-    <td contenteditable='false'>0</td>
+    <td class='biaya' contenteditable='true'>${toRupiah(0)}</td>
+    <td class='total' contenteditable='false'>${toRupiah(0)}</td>
     <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
 
-  row.addEventListener('input', ()=>{
-    let qty = parseFloat(row.cells[0].innerText)||0;
-    let biaya = parseFloat(row.cells[1].innerText)||0;
-    row.cells[2].innerText = qty * biaya;
-  });
-}
-
-// Hapus baris
-function hapus(btn) {
-  btn.parentElement.parentElement.remove();
-}
-</script>
-
-</body>
-</html>
+  row.addEventListener("input", () => {
+    let qty = parseFloat(row.cells[0].innerText) || 0;
