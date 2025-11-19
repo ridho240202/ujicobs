@@ -58,6 +58,11 @@ function toRupiah(num) {
 function fromRupiah(str) {
   return parseInt(str.replace(/[^0-9]/g, "")) || 0;
 }
+
+// Hapus baris
+function hapus(btn) {
+  btn.parentElement.parentElement.remove();
+}
 </script>
 
 <!-- ========================================= -->
@@ -81,6 +86,60 @@ function fromRupiah(str) {
   </table>
 </div>
 
+<script>
+function tambahBarisKalibrasi() {
+  let table = document.getElementById("tabelKalibrasi");
+  let row = table.insertRow();
+
+  let dropdown =
+    `<select onchange='isiOtomatis(this)'>
+      <option value=''>-- pilih alat --</option>
+      ${alatData.map((a, i) => `<option value='${i}'>${a.nama}</option>`).join("")}
+    </select>`;
+
+  row.innerHTML = `
+    <td>${dropdown}</td>
+    <td contenteditable='true'></td>
+    <td class='qty' contenteditable='true'>1</td>
+    <td class='jam' contenteditable='true'>0</td>
+    <td class='harga' contenteditable='true'>${toRupiah(0)}</td>
+    <td class='total'>${toRupiah(0)}</td>
+    <td><button onclick='hapus(this)'>Hapus</button></td>
+  `;
+
+  // Auto hitung ketika ada perubahan
+  row.querySelectorAll("[contenteditable]").forEach(cell => {
+    cell.addEventListener("input", hitungTotalKalibrasi);
+  });
+}
+
+function isiOtomatis(sel) {
+  if (sel.value === "") return;
+
+  let data = alatData[sel.value];
+  let tr = sel.parentElement.parentElement;
+
+  tr.cells[1].innerText = "-";            // No Seri (manual)
+  tr.cells[3].innerText = "1";            // Total Jam default
+  tr.cells[4].innerText = toRupiah(data.tarif);
+
+  hitungTotalKalibrasi();
+}
+
+// Hitung total otomatis
+function hitungTotalKalibrasi() {
+  document.querySelectorAll("#tabelKalibrasi tr").forEach((tr, idx) => {
+    if (idx === 0) return;
+
+    let qty = parseInt(tr.querySelector(".qty").innerText) || 0;
+    let harga = fromRupiah(tr.querySelector(".harga").innerText);
+
+    let total = qty * harga;
+    tr.querySelector(".total").innerText = toRupiah(total);
+  });
+}
+</script>
+
 <!-- ========================================= -->
 <!-- ====== 3. ALAT TIDAK DAPAT DIKALIBRASI === -->
 <!-- ========================================= -->
@@ -98,6 +157,21 @@ function fromRupiah(str) {
     </tr>
   </table>
 </div>
+
+<script>
+function tambahBarisNonKalibrasi() {
+  let table = document.getElementById("tabelNonKalibrasi");
+  let row = table.insertRow();
+
+  row.innerHTML = `
+    <td contenteditable='true'></td>
+    <td contenteditable='true'></td>
+    <td contenteditable='true'>1</td>
+    <td contenteditable='true'></td>
+    <td><button onclick='hapus(this)'>Hapus</button></td>
+  `;
+}
+</script>
 
 <!-- ========================================= -->
 <!-- ========= 4. BIAYA JASA KALIBRATOR ======= -->
@@ -117,91 +191,24 @@ function fromRupiah(str) {
 </div>
 
 <script>
-/* ================================================================
-   ========== 2. TAMBAH ITEM KALIBRASI + DROPDOWN JSON ============
-   ================================================================ */
-function tambahBarisKalibrasi() {
-  let table = document.getElementById("tabelKalibrasi");
-  let row = table.insertRow();
-
-  let dropdown =
-    `<select onchange='isiOtomatis(this)'>
-      <option value=''>-- pilih alat --</option>
-      ${alatData.map((a, i) => `<option value='${i}'>${a.nama}</option>`).join("")}
-    </select>`;
-
-  row.innerHTML = `
-    <td>${dropdown}</td>
-    <td contenteditable='true'></td>
-    <td class='qty' contenteditable='true'>1</td>
-    <td class='jam' contenteditable='true'>0</td>
-    <td class='harga' contenteditable='true'>${toRupiah(0)}</td>
-    <td class='total' contenteditable='false'>${toRupiah(0)}</td>
-    <td><button onclick='hapus(this)'>Hapus</button></td>
-  `;
-
-  // Event input agar qty / harga berubah → total update
-  row.addEventListener("input", () => {
-    hitungTotalKalibrasi();
-  });
-}
-
-// isi otomatis dari JSON
-function isiOtomatis(sel) {
-  if (sel.value === "") return;
-
-  let data = alatData[sel.value];
-  let tr = sel.parentElement.parentElement;
-
-  tr.cells[1].innerText = "-";
-  tr.cells[3].innerText = data.kemampuan;
-  tr.cells[4].innerText = toRupiah(data.tarif);
-
-  hitungTotalKalibrasi();
-}
-
-// Hitung total otomatis + auto format Rupiah
-function hitungTotalKalibrasi() {
-  document.querySelectorAll("#tabelKalibrasi tr").forEach((tr, idx) => {
-    if (idx === 0) return;
-
-    let qty = parseFloat(tr.querySelector(".qty").innerText) || 0;
-    let harga = fromRupiah(tr.querySelector(".harga").innerText);
-
-    let total = qty * harga;
-    tr.querySelector(".total").innerText = toRupiah(total);
-  });
-}
-
-/* ================================================================
-   =============== 3. TAMBAH BARIS NON-KALIBRASI ===================
-   ================================================================ */
-function tambahBarisNonKalibrasi() {
-  let table = document.getElementById("tabelNonKalibrasi");
-  let row = table.insertRow();
-
-  row.innerHTML = `
-    <td contenteditable='true'></td>
-    <td contenteditable='true'></td>
-    <td contenteditable='true'>1</td>
-    <td contenteditable='true'></td>
-    <td><button onclick='hapus(this)'>Hapus</button></td>
-  `;
-}
-
-/* ================================================================
-   ============= 4. BIAYA JASA KALIBRATOR + RUPIAH ================
-   ================================================================ */
 function tambahBarisKalibrator() {
   let table = document.getElementById("tabelKalibrator");
   let row = table.insertRow();
 
   row.innerHTML = `
-    <td contenteditable='true'>1</td>
+    <td class='orang' contenteditable='true'>1</td>
     <td class='biaya' contenteditable='true'>${toRupiah(0)}</td>
-    <td class='total' contenteditable='false'>${toRupiah(0)}</td>
+    <td class='total'>${toRupiah(0)}</td>
     <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
 
   row.addEventListener("input", () => {
-    let qty = parseFloat(row.cells[0].innerText) || 0;
+    let org = parseInt(row.querySelector(".orang").innerText) || 0;
+    let biaya = fromRupiah(row.querySelector(".biaya").innerText);
+    row.querySelector(".total").innerText = toRupiah(org * biaya);
+  });
+}
+</script>
+
+</body>
+</html>
