@@ -59,7 +59,59 @@ const alatData = [
 
 <!-- =========================== FORM PEMBUATAN PO =========================== -->
 <div class="section">
-  <h3>2. Item Purchase Order</h3>
+  <h3>2. Item PO (Alat yang Dikalibrasi)
+<button onclick="tambahItemKalibrasi()">Tambah Item</button>
+<table id="tabelKalibrasi" border="1" style="width:100%; margin-top:10px;">
+  <tr>
+    <th>Nama Alat</th>
+    <th>No Seri</th>
+    <th>Qty</th>
+    <th>Total Jam</th>
+    <th>Harga</th>
+    <th>Total</th>
+    <th>Aksi</th>
+  </tr>
+</table>
+
+3. Alat Tidak Dapat Dikalibrasi
+<button onclick="tambahItemNonKalibrasi()">Tambah Item</button>
+<table id="tabelNonKalibrasi" border="1" style="width:100%; margin-top:10px;">
+  <tr>
+    <th>Nama Alat</th>
+    <th>No Seri</th>
+    <th>Qty</th>
+    <th>Keterangan</th>
+    <th>Aksi</th>
+  </tr>
+</table>
+
+<script>
+function tambahItemKalibrasi() {
+  const table = document.getElementById('tabelKalibrasi');
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td contenteditable='true'></td>
+    <td contenteditable='true'></td>
+    <td contenteditable='true'>1</td>
+    <td contenteditable='true'>0</td>
+    <td contenteditable='true'>0</td>
+    <td contenteditable='false'>0</td>
+    <td><button onclick='this.parentElement.parentElement.remove()'>Hapus</button></td>
+  `;
+}
+
+function tambahItemNonKalibrasi() {
+  const table = document.getElementById('tabelNonKalibrasi');
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td contenteditable='true'></td>
+    <td contenteditable='true'></td>
+    <td contenteditable='true'>1</td>
+    <td contenteditable='true'></td>
+    <td><button onclick='this.parentElement.parentElement.remove()'>Hapus</button></td>
+  `;
+}
+</script></h3>
 
   <label>Pilih Nama Alat</label>
   <select id="pilihAlat" onchange="isiDetailAlat()">
