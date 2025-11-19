@@ -1,51 +1,300 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>PO System</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PO System (Static GitHub Pages)</title>
+  <style>
+    :root{--accent:#2563eb;--muted:#666}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;padding:18px;background:#f7f9fc;color:#111}
+    .container{max-width:980px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(20,30,60,0.06)}
+    h1{margin:0 0 12px;font-size:20px}
+    label{display:block;margin-top:10px;font-size:13px}
+    input,select,button{padding:8px 10px;border:1px solid #d6d9e0;border-radius:6px;font-size:14px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .actions{margin-top:12px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border:1px solid #eee;text-align:left}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .btn.secondary{background:#6b7280}
+    .center{text-align:center}
+    .flex{display:flex;gap:8px;align-items:center}
+    .small{font-size:13px;padding:6px 8px}
+    .inline-input{width:110px}
+    .notice{background:#fff8e6;border-left:4px solid #ffd16a;padding:10px;border-radius:6px;margin-top:12px}
+  </style>
 </head>
 <body>
-  <nav>
-    <button onclick="showPage('poList')">Tampilan PO</button>
-    <button onclick="showPage('itemList')">Daftar Item & Harga</button>
-  </nav>
+  <div class="container">
+    <h1>📄 Purchase Order — Static (GitHub Pages friendly)</h1>
+    <div id="page-company">
+      <h2>1) Informasi Perusahaan / Customer</h2>
+      <div>
+        <label>Perusahaan</label>
+        <input id="company_name" placeholder="Nama perusahaan" />
+        <label>Alamat</label>
+        <input id="company_address" placeholder="Alamat" />
+        <div class="row">
+          <div class="col">
+            <label>Fax</label>
+            <input id="company_fax" placeholder="Fax" />
+          </div>
+          <div class="col">
+            <label>Melalui</label>
+            <input id="company_via" placeholder="Melalui (sales / agen)" />
+          </div>
+          <div class="col">
+            <label>Kontak Person</label>
+            <input id="company_contact" placeholder="Nama / no. telp" />
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="to-po">➕ Buat PO Baru</button>
+        </div>
+      </div>
+    </div>
 
-  <!-- Halaman PO List -->
-  <div id="poList" class="page">
-    <h2>Daftar Purchase Order</h2>
-    <table id="poTable">
-      <thead>
-        <tr>
-          <th>Perusahaan</th>
-          <th>Alamat</th>
-          <th>Fax</th>
-          <th>Melalui</th>
-          <th>Kontak Person</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button onclick="createNewPO()">+ Buat PO Baru</button>
+    <div id="page-po" style="display:none">
+      <h2>2) Buat PO — Pilih Alat & Jumlah</h2>
+      <div class="row">
+        <div style="flex:3">
+          <label>Pilih Nama Alat</label>
+          <select id="tool_select"></select>
+        </div>
+        <div style="flex:1">
+          <label>Qty</label>
+          <input id="qty" type="number" min="1" value="1" />
+        </div>
+        <div style="flex:2">
+          <label>Tarif (editable)</label>
+          <input id="price" class="inline-input" type="number" min="0" step="0.01" />
+        </div>
+        <div style="flex:1;display:flex;align-items:end">
+          <button class="btn" id="add_item">Tambah Item</button>
+        </div>
+      </div>
+
+      <div class="notice">
+        <strong>Catatan:</strong> Data instrumen dimuat dari <code>/data.json</code> jika tersedia. Jika tidak, sistem akan memakai contoh internal. Anda bisa meletakkan file <code>data.json</code> di repo yang sama untuk mengubah daftar alat.
+      </div>
+
+      <table id="items_table">
+        <thead>
+          <tr><th>Nama Alat</th><th>Lokasi</th><th>Status Akreditasi</th><th>Kemampuan/Standar</th><th>Qty</th><th>Tarif</th><th>Total</th><th>Aksi</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div style="margin-top:12px" class="flex">
+        <div class="muted">Total PO: <span id="po_total">0</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="save_po">💾 Simpan & Download PO (JSON)</button>
+        <button class="btn secondary" id="back_company">⬅ Kembali</button>
+      </div>
+
+      <div style="margin-top:14px">
+        <h3>PO Tersimpan (di LocalStorage)</h3>
+        <div id="saved_list"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px" class="muted">
+      Petunjuk singkat: tempatkan <code>index.html</code> dan (opsional) <code>data.json</code> di repository GitHub dan aktifkan GitHub Pages pada branch main (atau gh-pages). Halaman akan bisa diakses sebagai situs statis dan akan memuat data dari <code>/data.json</code>.
+    </div>
   </div>
 
-  <!-- Halaman Item List -->
-  <div id="itemList" class="page" style="display:none;">
-    <h2>Daftar Nama Alat</h2>
-    <table id="itemTable">
-      <thead>
-        <tr>
-          <th>Nama Alat</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <input type="text" id="newItem" placeholder="Nama Alat">
-    <button onclick="addItem()">Simpan</button>
-  </div>
+<script>
+// --- sample fallback data (will be used if /data.json not found) ---
+const SAMPLE_DATA = [
+  {"id": "T-001","nama":"Alat Kalibrasi A","tarif":150000,"waktu":"2 jam","lokasi":"Site A","status_akreditasi":"SNI","kemampuan":"0.01 - 100","keterangan":"contoh"},
+  {"id": "T-002","nama":"Alat Uji B","tarif":200000,"waktu":"3 jam","lokasi":"Site B","status_akreditasi":"ISO/IEC","kemampuan":"0.1 - 50","keterangan":"contoh"}
+];
 
-  <script src="script.js"></script>
+let tools = [];
+let items = [];
+
+async function loadTools(){
+  try{
+    const r = await fetch('./data.json', {cache: 'no-store'});
+    if(!r.ok) throw new Error('no data.json');
+    tools = await r.json();
+    console.log('Loaded data.json', tools);
+  }catch(e){
+    console.warn('Falling back to sample data', e);
+    tools = SAMPLE_DATA;
+  }
+  populateToolSelect();
+}
+
+function populateToolSelect(){
+  const sel = document.getElementById('tool_select');
+  sel.innerHTML = '';
+  tools.forEach(t=>{
+    const opt = document.createElement('option');
+    opt.value = t.id || t.nama;
+    opt.dataset.tarif = t.tarif || 0;
+    opt.textContent = `${t.nama} — Rp ${numberFormat(t.tarif)} — ${t.lokasi || '-'} `;
+    sel.appendChild(opt);
+  });
+  // set price default
+  setPriceFromSel();
+}
+
+function setPriceFromSel(){
+  const sel = document.getElementById('tool_select');
+  const price = document.getElementById('price');
+  const opt = sel.options[sel.selectedIndex];
+  price.value = opt ? opt.dataset.tarif : 0;
+}
+
+document.getElementById('tool_select').addEventListener('change', setPriceFromSel);
+
+document.getElementById('add_item').addEventListener('click', ()=>{
+  const sel = document.getElementById('tool_select');
+  const id = sel.value;
+  const tool = tools.find(t=> (t.id||t.nama) == id) || {nama:sel.options[sel.selectedIndex].text};
+  const qty = parseFloat(document.getElementById('qty').value) || 1;
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  addItem({id: tool.id || id, nama: tool.nama || id, lokasi: tool.lokasi||'', status_akreditasi: tool.status_akreditasi||'', kemampuan: tool.kemampuan||'', qty, price});
+});
+
+function addItem(item){
+  // if same instrument already exists, increase qty
+  const existing = items.find(it=>it.id === item.id && it.price===item.price);
+  if(existing){ existing.qty += item.qty; }
+  else items.push(item);
+  renderItems();
+}
+
+function renderItems(){
+  const tbody = document.querySelector('#items_table tbody');
+  tbody.innerHTML = '';
+  let total = 0;
+  items.forEach((it, idx)=>{
+    const tr = document.createElement('tr');
+    const lineTotal = (it.qty * it.price);
+    total += lineTotal;
+    tr.innerHTML = `
+      <td>${escapeHtml(it.nama)}</td>
+      <td>${escapeHtml(it.lokasi||'-')}</td>
+      <td>${escapeHtml(it.status_akreditasi||'-')}</td>
+      <td>${escapeHtml(it.kemampuan||'-')}</td>
+      <td><input type="number" min="1" value="${it.qty}" data-idx="${idx}" class="small qty-input" style="width:80px"/></td>
+      <td><input type="number" min="0" step="0.01" value="${it.price}" data-idx="${idx}" class="small price-input inline-input"/></td>
+      <td>Rp ${numberFormat(lineTotal)}</td>
+      <td><button class="small" data-action="remove" data-idx="${idx}">Hapus</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('po_total').textContent = `Rp ${numberFormat(total)}`;
+  // attach events
+  document.querySelectorAll('.qty-input').forEach(input=>{
+    input.addEventListener('change', e=>{
+      const i = parseInt(e.target.dataset.idx);
+      items[i].qty = parseFloat(e.target.value) || 0;
+      renderItems();
+    });
+  });
+  document.querySelectorAll('.price-input').forEach(input=>{
+    input.addEventListener('change', e=>{
+      const i = parseInt(e.target.dataset.idx);
+      items[i].price = parseFloat(e.target.value) || 0;
+      renderItems();
+    });
+  });
+  document.querySelectorAll('button[data-action="remove"]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const i = parseInt(e.target.dataset.idx);
+      items.splice(i,1); renderItems();
+    });
+  });
+}
+
+function numberFormat(n){
+  return Number(n).toLocaleString('id-ID', {maximumFractionDigits:2});
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+// navigation
+document.getElementById('to-po').addEventListener('click', ()=>{
+  // minimal validation
+  const name = document.getElementById('company_name').value.trim();
+  if(!name){alert('Isi nama perusahaan dulu.'); return;}
+  document.getElementById('page-company').style.display='none';
+  document.getElementById('page-po').style.display='block';
+  renderSavedList();
+});
+document.getElementById('back_company').addEventListener('click', ()=>{
+  document.getElementById('page-company').style.display='block';
+  document.getElementById('page-po').style.display='none';
+});
+
+// Save PO -> download JSON and store in localStorage
+document.getElementById('save_po').addEventListener('click', ()=>{
+  if(items.length===0){ alert('Tambahkan minimal 1 item.'); return; }
+  const po = buildPO();
+  const filename = `PO_${po.company.name.replace(/\s+/g,'_')}_${(new Date()).toISOString().slice(0,19).replace(/:/g,'')}.json`;
+  const blob = new Blob([JSON.stringify(po,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  saveToLocalStorage(po);
+  renderSavedList();
+});
+
+function buildPO(){
+  const company = {
+    name: document.getElementById('company_name').value.trim(),
+    address: document.getElementById('company_address').value.trim(),
+    fax: document.getElementById('company_fax').value.trim(),
+    via: document.getElementById('company_via').value.trim(),
+    contact: document.getElementById('company_contact').value.trim()
+  };
+  const subtotal = items.reduce((s,it)=>s + (it.qty*it.price),0);
+  return { created_at: new Date().toISOString(), company, items, subtotal };
+}
+
+function saveToLocalStorage(po){
+  const key = 'po_list_v1';
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  arr.unshift(po); // newest first
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function renderSavedList(){
+  const key = 'po_list_v1';
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  const el = document.getElementById('saved_list');
+  if(arr.length===0){ el.innerHTML = '<div class="muted">Belum ada PO tersimpan.</div>'; return; }
+  el.innerHTML = arr.map((p,idx)=>{
+    return `<div style="border:1px solid #eee;padding:8px;margin-bottom:8px;border-radius:6px"><div><strong>${escapeHtml(p.company.name)}</strong> — ${new Date(p.created_at).toLocaleString()}</div><div class="muted">Items: ${p.items.length} — Total Rp ${numberFormat(p.subtotal)}</div><div style="margin-top:6px"><button class="small" data-idx="${idx}" data-action="download_saved">Download</button> <button class="small" data-idx="${idx}" data-action="delete_saved">Hapus</button></div></div>`;
+  }).join('');
+  el.querySelectorAll('button[data-action="download_saved"]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const i = parseInt(e.target.dataset.idx);
+      const data = arr[i];
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download = `PO_saved_${i}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+  });
+  el.querySelectorAll('button[data-action="delete_saved"]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const i = parseInt(e.target.dataset.idx);
+      if(!confirm('Hapus PO ini dari localStorage?')) return;
+      arr.splice(i,1); localStorage.setItem('po_list_v1', JSON.stringify(arr)); renderSavedList();
+    });
+  });
+}
+
+// on load
+loadTools();
+renderItems();
+
+</script>
 </body>
 </html>
