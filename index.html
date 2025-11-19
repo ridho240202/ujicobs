@@ -1,301 +1,183 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>PO System</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    body { font-family: Arial; margin: 20px; }
-    input, select { padding: 6px; width: 100%; margin: 4px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    button { padding: 8px 14px; margin-top: 10px; }
-    .section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
-  </style>
+<meta charset="UTF-8" />
+<title>PO System</title>
+<style>
+  body { font-family: Arial; margin:20px; }
+  input, select { padding:6px; width:100%; margin:4px 0; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { border:1px solid #ccc; padding:6px; }
+  button { padding:8px 14px; margin:8px 0; }
+  .section { border:1px solid #ddd; padding:15px; margin-bottom:20px; border-radius:8px; }
+</style>
 </head>
 <body>
-
 <h2>📄 PURCHASE ORDER SYSTEM</h2>
 
-<!-- =========================== INFORMASI PERUSAHAAN =========================== -->
+<!-- ==================== 1. INFORMASI PERUSAHAAN ===================== -->
 <div class="section">
   <h3>1. Informasi Perusahaan</h3>
-
-  <label>Perusahaan</label>
-  <input id="perusahaan" type="text" />
-
-  <label>Alamat</label>
-  <input id="alamat" type="text" />
-
-  <label>Fax</label>
-  <input id="fax" type="text" />
-
-  <label>Melalui</label>
-  <input id="melalui" type="text" />
-
-  <label>Kontak Person</label>
-  <input id="kontak" type="text" />
+  <label>Perusahaan</label><input id="perusahaan">
+  <label>Alamat</label><input id="alamat">
+  <label>Fax</label><input id="fax">
+  <label>Melalui</label><input id="melalui">
+  <label>Kontak Person</label><input id="kontak">
 </div>
 
-<!-- =========================== DATA ALAT DARI JSON =========================== -->
+<!-- ==================== DATA JSON UNTUK KALIBRASI ===================== -->
 <script>
 const alatData = [
   {
-    "nama": "Multimeter Digital",
-    "lokasi": "Lab Kalibrasi A",
-    "akreditasi": "ISO 17025",
-    "kemampuan": "0 - 1000V",
-    "tarif": 150000
+    nama: "Multimeter Digital",
+    lokasi: "Lab Kalibrasi A",
+    akreditasi: "ISO 17025",
+    kemampuan: "0 - 1000V",
+    tarif: 150000
   },
   {
-    "nama": "Sound Level Meter",
-    "lokasi": "Lab Akustik",
-    "akreditasi": "KAN",
-    "kemampuan": "30 - 130 dB",
-    "tarif": 200000
+    nama: "Sound Level Meter",
+    lokasi: "Lab Akustik",
+    akreditasi: "KAN",
+    kemampuan: "30 - 130 dB",
+    tarif: 200000
   }
 ];
 </script>
 
-<!-- =========================== FORM PEMBUATAN PO =========================== -->
+<!-- ==================== 2. ITEM PO (KALIBRASI) ===================== -->
 <div class="section">
-  <h3>2. Item PO (Alat yang Dikalibrasi)
-<button onclick="tambahItemKalibrasi()">Tambah Item</button>
-<table id="tabelKalibrasi" border="1" style="width:100%; margin-top:10px;">
-  <tr>
-    <th>Nama Alat</th>
-    <th>No Seri</th>
-    <th>Qty</th>
-    <th>Total Jam</th>
-    <th>Harga</th>
-    <th>Total</th>
-    <th>Aksi</th>
-  </tr>
-</table>
+  <h3>2. Item PO (Alat yang Dikalibrasi)</h3>
 
-3. Alat Tidak Dapat Dikalibrasi
-<button onclick="tambahItemNonKalibrasi()">Tambah Item</button>
-<table id="tabelNonKalibrasi" border="1" style="width:100%; margin-top:10px;">
-  <tr>
-    <th>Nama Alat</th>
-    <th>No Seri</th>
-    <th>Qty</th>
-    <th>Keterangan</th>
-    <th>Aksi</th>
-  </tr>
-</table>
+  <button onclick="tambahBarisKalibrasi()">Tambah Item</button>
+
+  <table id="tabelKalibrasi">
+    <tr>
+      <th>Nama Alat</th>
+      <th>No Seri</th>
+      <th>Qty</th>
+      <th>Total Jam</th>
+      <th>Harga</th>
+      <th>Total</th>
+      <th>Aksi</th>
+    </tr>
+  </table>
+</div>
+
+<!-- ==================== 3. ALAT NON-KALIBRASI ===================== -->
+<div class="section">
+  <h3>3. Alat Tidak Dapat Dikalibrasi</h3>
+  <button onclick="tambahBarisNonKalibrasi()">Tambah Item</button>
+
+  <table id="tabelNonKalibrasi">
+    <tr>
+      <th>Nama Alat</th>
+      <th>No Seri</th>
+      <th>Qty</th>
+      <th>Keterangan</th>
+      <th>Aksi</th>
+    </tr>
+  </table>
+</div>
+
+<!-- ==================== 4. BIAYA JASA KALIBRATOR ===================== -->
+<div class="section">
+  <h3>4. Biaya Jasa Kalibrator</h3>
+  <button onclick="tambahBarisKalibrator()">Tambah Baris</button>
+
+  <table id="tabelKalibrator">
+    <tr>
+      <th>Jumlah Orang</th>
+      <th>Biaya per Orang</th>
+      <th>Total</th>
+      <th>Aksi</th>
+    </tr>
+  </table>
+</div>
 
 <script>
-function tambahItemKalibrasi() {
-  const table = document.getElementById('tabelKalibrasi');
-  const row = table.insertRow();
+
+// ========== 2. TAMBAH ITEM KALIBRASI (DENGAN DROPDOWN OTOMATIS) ==========
+function tambahBarisKalibrasi() {
+  let table = document.getElementById("tabelKalibrasi");
+  let row = table.insertRow();
+
+  let dropdown = `<select onchange='isiOtomatis(this)'>
+      <option value=''>-- pilih alat --</option>
+      ${alatData.map((a,i)=>`<option value='${i}'>${a.nama}</option>`).join('')}
+    </select>`;
+
   row.innerHTML = `
-    <td contenteditable='true'></td>
+    <td>${dropdown}</td>
     <td contenteditable='true'></td>
     <td contenteditable='true'>1</td>
     <td contenteditable='true'>0</td>
     <td contenteditable='true'>0</td>
     <td contenteditable='false'>0</td>
-    <td><button onclick='this.parentElement.parentElement.remove()'>Hapus</button></td>
+    <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
 }
 
-function tambahItemNonKalibrasi() {
-  const table = document.getElementById('tabelNonKalibrasi');
-  const row = table.insertRow();
+function isiOtomatis(sel) {
+  if (sel.value === "") return;
+  let data = alatData[sel.value];
+  let tr = sel.parentElement.parentElement;
+
+  tr.cells[1].innerText = "-";
+  tr.cells[3].innerText = data.kemampuan;
+  tr.cells[4].innerText = data.tarif;
+
+  hitungTotal();
+}
+
+// Hitung otomatis total harga
+function hitungTotal() {
+  document.querySelectorAll('#tabelKalibrasi tr').forEach((tr,idx)=>{
+    if (idx===0) return;
+    let qty = parseFloat(tr.cells[2].innerText)||0;
+    let harga = parseFloat(tr.cells[4].innerText)||0;
+    tr.cells[5].innerText = qty * harga;
+  });
+}
+
+// ========== 3. TAMBAH ITEM NON KALIBRASI (MANUAL) ==========
+function tambahBarisNonKalibrasi() {
+  let table = document.getElementById("tabelNonKalibrasi");
+  let row = table.insertRow();
+
   row.innerHTML = `
     <td contenteditable='true'></td>
     <td contenteditable='true'></td>
     <td contenteditable='true'>1</td>
     <td contenteditable='true'></td>
-    <td><button onclick='this.parentElement.parentElement.remove()'>Hapus</button></td>
+    <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
 }
-</script></h3>
 
-  <label>Pilih Nama Alat</label>
-  <select id="pilihAlat" onchange="isiDetailAlat()">
-    <option value="">-- pilih alat --</option>
-  </select>
-
-  <div id="detailAlat" style="margin-top:10px; display:none;">
-    <label>Lokasi</label>
-    <input id="lokasi" type="text" disabled />
-
-    <label>Akreditasi</label>
-    <input id="akreditasi" type="text" disabled />
-
-    <label>Kemampuan</label>
-    <input id="kemampuan" type="text" disabled />
-
-    <label>Tarif (bisa diedit)</label>
-    <input id="tarif" type="number" />
-
-    <label>Qty</label>
-    <input id="qty" type="number" min="1" value="1" />
-
-    <button onclick="tambahItem()">Tambah Item</button>
-  </div>
-</div>
-
-<!-- =========================== TABEL PO =========================== -->
-<h3>Daftar Item PO</h3>
-<table id="tabelPO">
-  <thead>
-    <tr>
-      <th>Nama Alat</th>
-      <th>Lokasi</th>
-      <th>Akreditasi</th>
-      <th>Kemampuan</th>
-      <th>Qty</th>
-      <th>Tarif</th>
-      <th>Total</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<button onclick="downloadExcel()">📥 Download Excel</button>
-
-<script>
-// ====== Load alat ke dropdown ======
-window.onload = function () {
-  let select = document.getElementById("pilihAlat");
-  alatData.forEach((a, i) => {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = a.nama;
-    select.appendChild(opt);
-  });
-};
-
-// ====== Tampilkan detail alat ======
-function isiDetailAlat() {
-  let idx = document.getElementById("pilihAlat").value;
-  if (idx === "") return;
-  let a = alatData[idx];
-
-  document.getElementById("lokasi").value = a.lokasi;
-  document.getElementById("akreditasi").value = a.akreditasi;
-  document.getElementById("kemampuan").value = a.kemampuan;
-  document.getElementById("tarif").value = a.tarif;
-
-  document.getElementById("detailAlat").style.display = "block";
-}
-
-// ====== Tambah item ke tabel ======
-function tambahItem() {
-  let idx = document.getElementById("pilihAlat").value;
-  if (idx === "") return;
-
-  let a = alatData[idx];
-  let qty = parseInt(document.getElementById("qty").value);
-  let tarif = parseInt(document.getElementById("tarif").value);
-  let total = qty * tarif;
-
-  let tbody = document.querySelector("#tabelPO tbody");
-  let row = document.createElement("tr");
+// ========== 4. BIAYA JASA KALIBRATOR ==========
+function tambahBarisKalibrator() {
+  let table = document.getElementById("tabelKalibrator");
+  let row = table.insertRow();
 
   row.innerHTML = `
-    <td>${a.nama}</td>
-    <td>${a.lokasi}</td>
-    <td>${a.akreditasi}</td>
-    <td>${a.kemampuan}</td>
-    <td>${qty}</td>
-    <td>${tarif}</td>
-    <td>${total}</td>
-    <td><button onclick="hapusRow(this)">Hapus</button></td>
+    <td contenteditable='true'>1</td>
+    <td contenteditable='true'>0</td>
+    <td contenteditable='false'>0</td>
+    <td><button onclick='hapus(this)'>Hapus</button></td>
   `;
 
-  tbody.appendChild(row);
-}
-
-// ====== Hapus ======
-function hapusRow(btn) {
-  btn.parentElement.parentElement.remove();
-}
-
-// ====== Download Excel ======
-function downloadExcel() {
-  let perusahaan = document.getElementById("perusahaan").value;
-  let alamat = document.getElementById("alamat").value;
-  let fax = document.getElementById("fax").value;
-  let melalui = document.getElementById("melalui").value;
-  let kontak = document.getElementById("kontak").value;
-
-  let rows = [["Nama Alat", "Lokasi", "Akreditasi", "Kemampuan", "Qty", "Tarif", "Total" ]];
-
-  document.querySelectorAll("#tabelPO tbody tr").forEach(tr => {
-    let data = Array.from(tr.children).slice(0,7).map(td => td.innerText);
-    rows.push(data);
+  row.addEventListener('input', ()=>{
+    let qty = parseFloat(row.cells[0].innerText)||0;
+    let biaya = parseFloat(row.cells[1].innerText)||0;
+    row.cells[2].innerText = qty * biaya;
   });
+}
 
-  // Sheet 1: Informasi Perusahaan
-  let sheet1 = [
-    ["Perusahaan", perusahaan],
-    ["Alamat", alamat],
-    ["Fax", fax],
-    ["Melalui", melalui],
-    ["Kontak Person", kontak]
-  ];
-
-  let wb = XLSX.utils.book_new();
-  let ws1 = XLSX.utils.aoa_to_sheet(sheet1);
-  let ws2 = XLSX.utils.aoa_to_sheet(rows);
-
-  XLSX.utils.book_append_sheet(wb, ws1, "Perusahaan");
-  XLSX.utils.book_append_sheet(wb, ws2, "Item PO");
-
-  XLSX.writeFile(wb, "PO.xlsx");
+// Hapus baris
+function hapus(btn) {
+  btn.parentElement.parentElement.remove();
 }
 </script>
 
-  <h3>Tambah Item Manual</h3>
-  <div class="manual-box" style="border:1px solid #ccc; padding:15px; border-radius:8px; margin-top:15px;">
-    <label>Nama Alat Manual</label>
-    <input type="text" id="manualNama" placeholder="Masukkan nama alat">
-
-    <label>Qty Manual</label>
-    <input type="number" id="manualQty" value="1" min="1">
-
-    <label>Tarif Manual</label>
-    <input type="number" id="manualTarif" value="0" min="0">
-
-    <button onclick="tambahManual()">Tambah Manual</button>
-  </div>
-
-  <script>
-    function tambahManual() {
-      const nama = document.getElementById('manualNama').value;
-      const qty = parseInt(document.getElementById('manualQty').value);
-      const tarif = parseFloat(document.getElementById('manualTarif').value);
-
-      if (!nama || qty <= 0 || tarif < 0) {
-        alert('Mohon isi semua field dengan benar');
-        return;
-      }
-
-      const total = qty * tarif;
-
-      const table = document.getElementById('tabelPO');
-      const row = table.insertRow();
-
-      row.insertCell(0).innerText = nama;
-      row.insertCell(1).innerText = '-';
-      row.insertCell(2).innerText = '-';
-      row.insertCell(3).innerText = '-';
-      row.insertCell(4).innerText = qty;
-      row.insertCell(5).innerText = tarif;
-      row.insertCell(6).innerText = total;
-
-      const aksi = row.insertCell(7);
-      aksi.innerHTML = `<button onclick="this.parentElement.parentElement.remove()">Hapus</button>`;
-
-      document.getElementById('manualNama').value = '';
-      document.getElementById('manualQty').value = 1;
-      document.getElementById('manualTarif').value = 0;
-    }
-  </script>
 </body>
 </html>
